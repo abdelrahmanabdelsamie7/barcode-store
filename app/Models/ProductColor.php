@@ -1,6 +1,6 @@
 <?php
 namespace App\Models;
-use App\Models\{Product, Color};
+use App\Models\{Product, Color, ProductVariant, ProductColorImage};
 use App\traits\UsesUuid;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,5 +21,9 @@ class ProductColor extends Model
     public function product_color_images()
     {
         return $this->hasMany(ProductColorImage::class, 'product_color_id');
+    }
+    public function product_variants()
+    {
+        return $this->hasMany(ProductVariant::class, 'product_color_id');
     }
 }

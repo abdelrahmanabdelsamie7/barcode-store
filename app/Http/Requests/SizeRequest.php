@@ -10,7 +10,7 @@ class SizeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255'
+            'name' => 'required|string|in:S,M,L,XL,XXL,XXXL,4XL,5XL,6XL',
         ];
     }
 }

@@ -7,8 +7,8 @@ return new class extends Migration {
     {
         Schema::create('product_variants', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('product_color_id')->constrained()->cascadeOnDelete();
-            $table->foreignUuid('size_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('product_color_id')->constrained('product_colors')->cascadeOnDelete();
+            $table->foreignUuid('size_id')->constrained('sizes')->cascadeOnDelete();
             $table->integer('quantity');
             $table->unique(['product_color_id', 'size_id'], 'unique_product_color_size');
             $table->timestamps();
