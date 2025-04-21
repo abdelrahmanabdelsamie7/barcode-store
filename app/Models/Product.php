@@ -17,12 +17,21 @@ class Product extends Model
         'sku',
         'price_before_discount',
         'discount',
-        'price_after_discount',
         'status',
         'sub_category_id',
         'brand_id',
     ];
-    public function sub_category()
+    public function getFinalPriceAttribute()
+    {
+        $price = $this->price_before_discount;
+        $localDiscount = $this->discount ?? 0;
+        $globalDiscount = optional($this->subCategory)->globalDiscounts()
+            ->where('status', 'active')
+            ->max('percentage') ?? 0;
+        $finalDiscount = max($localDiscount, $globalDiscount);
+        return round($price * (1 - $finalDiscount / 100), 2);
+    }
+    public function subCategory()
     {
         return $this->belongsTo(SubCategory::class, 'sub_category_id');
     }
