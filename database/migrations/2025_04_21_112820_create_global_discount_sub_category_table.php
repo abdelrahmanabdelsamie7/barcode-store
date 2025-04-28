@@ -8,8 +8,9 @@ return new class extends Migration {
     {
         Schema::create('global_discount_sub_category', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('global_discount_id')->constrained('global_discounts')->cascadeOnUpdate()->cascadeOnDelete();
-            $table->foreignUuid('sub_category_id')->constrained('sub_categories')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignUuid('global_discount_id')->unique()->constrained('global_discounts')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignUuid('sub_category_id')->unique()->constrained('sub_categories')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->timestamps();
         });
     }
     public function down(): void

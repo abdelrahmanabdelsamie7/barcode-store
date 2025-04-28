@@ -13,7 +13,7 @@ class BrandRequest extends FormRequest
         return [
             'name' => 'required|string|max:255|unique:brands,name,' . $brandId,
             'slug' => 'required|string|max:255|unique:brands,slug,' . $brandId,
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:4048',
             'is_active' => 'required|boolean',
         ];
     }

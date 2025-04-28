@@ -12,11 +12,11 @@ class ProductResource extends JsonResource
             'description' => $this->description,
             'cover_image' => $this->image_cover,
             'sku' => $this->sku,
-            'original_price' => $this->price_before_discount,
+            'price_before_discount' => $this->price_before_discount,
+            'final_price' => $this->final_price,
             'discount' => $this->discount,
-            'final_price' => $this->price_after_discount,
             'status' => $this->status,
-
+            'global_discounts' => GlobalDiscountResource::collection($this->globalDiscounts),
             'sub_category' => [
                 'id' => $this->sub_category->id,
                 'name' => $this->sub_category->name,

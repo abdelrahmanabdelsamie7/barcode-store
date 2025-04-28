@@ -1,7 +1,7 @@
 <?php
 namespace App\Models;
 use App\traits\UsesUuid;
-use App\Models\{SubCategory, Brand, ProductColor, Color, ProductColorImage, ProductVariant};
+use App\Models\{SubCategory, Brand, ProductColor, Color, ProductColorImage, ProductVariant,GlobalDiscount,GlobalDiscountSubCategory};
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -25,13 +25,24 @@ class Product extends Model
     {
         $price = $this->price_before_discount;
         $localDiscount = $this->discount ?? 0;
-        $globalDiscount = optional($this->subCategory)->globalDiscounts()
+        $globalDiscount = optional($this->sub_category)->globalDiscounts()
             ->where('status', 'active')
             ->max('percentage') ?? 0;
-        $finalDiscount = max($localDiscount, $globalDiscount);
+        $finalDiscount = $globalDiscount > 0 ? max($localDiscount, $globalDiscount) : $localDiscount;
         return round($price * (1 - $finalDiscount / 100), 2);
     }
-    public function subCategory()
+    public function globalDiscounts()
+    {
+        return $this->hasManyThrough(
+            GlobalDiscount::class,
+            GlobalDiscountSubCategory::class,
+            'sub_category_id',
+            'id',
+            'sub_category_id',
+            'global_discount_id'
+        );
+    }
+    public function sub_category()
     {
         return $this->belongsTo(SubCategory::class, 'sub_category_id');
     }

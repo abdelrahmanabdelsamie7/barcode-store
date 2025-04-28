@@ -7,7 +7,7 @@ return new class extends Migration {
     {
         Schema::create('global_discounts', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('name');
+            $table->string('name')->unique();;
             $table->integer('percentage');
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
