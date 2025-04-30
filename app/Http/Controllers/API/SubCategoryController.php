@@ -15,7 +15,7 @@ class SubCategoryController extends Controller
     }
     public function show(string $id)
     {
-        $subCategory =SubCategory::findOrFail($id); // add products relation here later
+        $subCategory =SubCategory::with(['products','offers'])->findOrFail($id);
         return $this->sendSuccess('Specific SubCategory Retrieved Successfully!', $subCategory);
     }
     public function store(SubCategoryRequest $request)

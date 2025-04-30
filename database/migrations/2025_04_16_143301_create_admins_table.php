@@ -7,7 +7,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('admins', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
+            $table->string('name') ;
+            $table->string('email')->unique();
+            $table->string('password');
+             $table->string('role')->default('super-admin');
             $table->timestamps();
         });
     }

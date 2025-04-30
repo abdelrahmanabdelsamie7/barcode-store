@@ -23,7 +23,7 @@ class ProductController extends Controller
         ])->findOrFail($id);
         return response()->json([
             'success' => true,
-            'message' => 'Product details fetched successfully.',
+            'message' => 'Product Details Retrieved Successfully.',
             'data' => new ProductResource($product),
         ]);
     }

@@ -27,21 +27,20 @@ class Product extends Model
     public function getDiscountAttribute()
     {
         $now = now();
-        $subCatOffer = $this->sub_category?->offers()
+        $subCatOffers = $this->sub_category?->offers()
             ->where('start_at', '<=', $now)
             ->where('end_at', '>=', $now)
-            ->latest()
-            ->first();
-        if ($subCatOffer) {
-            return $subCatOffer->discount;
-        }
+            ->get();
+        $subCatDiscount = $subCatOffers->isNotEmpty()
+            ? $subCatOffers->max('discount')
+            : 0;
         $productOffer = $this->offers()
             ->where('start_at', '<=', $now)
             ->where('end_at', '>=', $now)
             ->latest()
             ->first();
-
-        return $productOffer?->discount;
+        $productDiscount = $productOffer ? $productOffer->discount : 0;
+        return max($subCatDiscount, $productDiscount);
     }
     public function sub_category()
     {

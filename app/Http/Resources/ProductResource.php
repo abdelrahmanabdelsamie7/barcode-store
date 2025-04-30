@@ -17,12 +17,20 @@ class ProductResource extends JsonResource
             'price_before_discount' => $this->price_before_discount,
             'final_price' => $this->price_before_discount * (1 - ($this->discount ?? 0) / 100), // استخدام الخصم من الـ Accessor
             'status' => $this->status,
-            'offers' => $this->offers, // جلب العروض المرتبطة
+            'offers' => $this->offers,
             'sub_category' => [
                 'id' => $this->sub_category->id,
                 'name' => $this->sub_category->name,
                 'slug' => $this->sub_category->slug,
                 'image' => $this->sub_category->image,
+                'offers' => $this->sub_category->offers->map(function ($offer) {
+                    return [
+                        'id' => $offer->id,
+                        'discount' => $offer->discount,
+                        'start_at' => $offer->start_at,
+                        'end_at' => $offer->end_at,
+                    ];
+                }),
             ],
             'brand' => [
                 'id' => $this->brand->id,

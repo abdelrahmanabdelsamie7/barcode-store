@@ -14,7 +14,7 @@ class AppServiceProvider extends ServiceProvider
     {
        Relation::morphMap([
         'product' => Product::class,
-        'subcategory' => SubCategory::class,
+        'sub_category' => SubCategory::class,
     ]);
     }
 }

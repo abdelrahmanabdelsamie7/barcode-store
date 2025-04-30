@@ -15,14 +15,14 @@ class OfferController extends Controller
     }
     public function show(string $id)
     {
-        $offer = Offer::findOrFail($id);
+        $offer = Offer::with('offerable')->findOrFail($id);
         return $this->sendSuccess('Specific Offer Retrieved Successfully!', $offer);
     }
     public function store(OfferRequest $request)
     {
         $offerableType = $request->offerable_type;
         $offerableId = $request->offerable_id;
-        if (!in_array($offerableType, ['product', 'subcategory'])) {
+        if (!in_array($offerableType, ['product', 'sub_category'])) {
             return response()->json(['message' => 'Invalid offerable type'], 422);
         }
         $offerableModel = $offerableType === 'product' ? Product::class : SubCategory::class;
