@@ -17,9 +17,17 @@ class ProductController extends Controller
     }
     public function show(string $id)
     {
-        $product = Product::with(['sub_category.globalDiscounts', 'product_colors.product_color_images', 'product_colors.product_variants.size', 'product_colors.color', 'brand', 'globalDiscounts'])->findOrFail($id);
-        return $this->sendSuccess('Product details fetched successfully.', new ProductResource($product));
+        $product = Product::with([
+            'sub_category.offers',
+            'offers',
+        ])->findOrFail($id);
+        return response()->json([
+            'success' => true,
+            'message' => 'Product details fetched successfully.',
+            'data' => new ProductResource($product),
+        ]);
     }
+
     public function store(ProductRequest $request)
     {
         $data = $request->validated();

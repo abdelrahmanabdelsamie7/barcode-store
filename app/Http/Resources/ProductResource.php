@@ -1,6 +1,8 @@
 <?php
 namespace App\Http\Resources;
+
 use Illuminate\Http\Resources\Json\JsonResource;
+
 class ProductResource extends JsonResource
 {
     public function toArray($request)
@@ -13,24 +15,21 @@ class ProductResource extends JsonResource
             'cover_image' => $this->image_cover,
             'sku' => $this->sku,
             'price_before_discount' => $this->price_before_discount,
-            'final_price' => $this->final_price,
-            'discount' => $this->discount,
+            'final_price' => $this->price_before_discount * (1 - ($this->discount ?? 0) / 100), // استخدام الخصم من الـ Accessor
             'status' => $this->status,
-            'global_discounts' => GlobalDiscountResource::collection($this->globalDiscounts),
+            'offers' => $this->offers, // جلب العروض المرتبطة
             'sub_category' => [
                 'id' => $this->sub_category->id,
                 'name' => $this->sub_category->name,
                 'slug' => $this->sub_category->slug,
                 'image' => $this->sub_category->image,
             ],
-
             'brand' => [
                 'id' => $this->brand->id,
                 'name' => $this->brand->name,
                 'slug' => $this->brand->slug,
                 'image' => $this->brand->image,
             ],
-
             'colors' => $this->product_colors->map(function ($colorItem) {
                 return [
                     'name' => $colorItem->color->name,

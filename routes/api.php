@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthUserController;
-use App\Http\Controllers\API\{BrandController,CategoryController,SubCategoryController,ProductController,ColorController,SizeController,ProductColorController,ProductColorImageController,ProductVariantController,GlobalDiscountController,GlobalDiscountSubCategoryController};
+use App\Http\Controllers\API\{BrandController,CategoryController,SubCategoryController,ProductController,ColorController,SizeController,ProductColorController,ProductColorImageController,ProductVariantController,OfferController};
 
 Route::apiResources([
     'brands' => BrandController::class,
@@ -13,8 +13,8 @@ Route::apiResources([
     'product-colors' => ProductColorController::class ,
     'product-size-quantity' => ProductVariantController::class ,
     'product-color-images' => ProductColorImageController::class,
-    'global-discounts' => GlobalDiscountController::class,
-    'global-discount-subcategory' => GlobalDiscountSubCategoryController::class,
+    'offers'=> OfferController::class,
+
 ]);
 
 Route::prefix('user')->group(function () {
