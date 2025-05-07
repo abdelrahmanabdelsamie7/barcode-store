@@ -13,7 +13,7 @@ class SubCategoryRequest extends FormRequest
         return [
             'name' => 'required|string|max:255|unique:sub_categories,name,' . $subCategoryId,
             'slug' => 'required|string|max:255|unique:sub_categories,slug,' . $subCategoryId,
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:4048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,avif|max:4048',
             'category_id' => 'required|string|exists:categories,id',
             'is_active' => 'required|boolean',
         ];

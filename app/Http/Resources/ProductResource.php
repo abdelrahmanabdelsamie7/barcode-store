@@ -15,7 +15,8 @@ class ProductResource extends JsonResource
             'cover_image' => $this->image_cover,
             'sku' => $this->sku,
             'price_before_discount' => $this->price_before_discount,
-            'final_price' => $this->price_before_discount * (1 - ($this->discount ?? 0) / 100), // استخدام الخصم من الـ Accessor
+            'final_price' => $this->final_price,
+            // 'final_price' => $this->price_before_discount * (1 - ($this->discount ?? 0) / 100), // استخدام الخصم من الـ Accessor
             'status' => $this->status,
             'offers' => $this->offers,
             'sub_category' => [
@@ -40,12 +41,14 @@ class ProductResource extends JsonResource
             ],
             'colors' => $this->product_colors->map(function ($colorItem) {
                 return [
+                    'id' => $colorItem->color->id,
                     'name' => $colorItem->color->name,
                     'code' => $colorItem->color->color_code,
                     'is_main' => (bool) $colorItem->is_main,
                     'images' => $colorItem->product_color_images->pluck('image'),
                     'variants' => $colorItem->product_variants->map(function ($variant) {
                         return [
+                            'id' => $variant->id,
                             'size' => $variant->size->name,
                             'quantity' => $variant->quantity,
                         ];

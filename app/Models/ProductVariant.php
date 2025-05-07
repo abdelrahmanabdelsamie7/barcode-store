@@ -1,7 +1,7 @@
 <?php
 namespace App\Models;
 use App\traits\UsesUuid;
-use App\Models\{ProductColor,Size};
+use App\Models\{ProductColor, Product, Size};
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -18,4 +18,5 @@ class ProductVariant extends Model
     {
         return $this->belongsTo(Size::class, 'size_id');
     }
+
 }

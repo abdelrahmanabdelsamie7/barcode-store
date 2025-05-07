@@ -10,7 +10,6 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('name')->unique();
             $table->string('slug')->unique();
-            $table->string('image');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

@@ -13,7 +13,6 @@ class CategoryRequest extends FormRequest
         return [
             'name' => 'required|string|max:255|unique:categories,name,' . $categoryId,
             'slug' => 'required|string|max:255|unique:categories,slug,' . $categoryId,
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:4048',
             'is_active' => 'required|boolean',
         ];
     }

@@ -8,7 +8,7 @@ class Category extends Model
 {
     use HasFactory, UsesUuid;
     protected $table = 'categories';
-    protected $fillable = ['name', 'slug', 'image', 'is_active'];
+    protected $fillable = ['name', 'slug', 'is_active'];
     public function sub_categories()
     {
         return $this->hasMany(SubCategory::class, 'category_id');

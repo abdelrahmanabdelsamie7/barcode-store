@@ -12,11 +12,18 @@ class ProductColorImageController extends Controller
     public function store(ProductColorImageRequest $request)
     {
         $data = $request->validated();
-        if ($request->hasFile('image')) {
-            $data['image'] = $this->uploadImage($request->file('image'));
+        $images = [];
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $imagePath = $this->uploadImage($image);
+                $productColorImage = ProductColorImage::create([
+                    'product_color_id' => $data['product_color_id'],
+                    'image' => $imagePath,
+                ]);
+                $images[] = $productColorImage->fresh();
+            }
         }
-        $product_color_image = ProductColorImage::create($data);
-        return $this->sendSuccess('Image Added To Color Of Product Successfully', $product_color_image, 201);
+        return $this->sendSuccess('Images Added To Color Of Product Successfully', $images, 201);
     }
     private function uploadImage($image)
     {

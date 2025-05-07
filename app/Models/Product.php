@@ -42,6 +42,11 @@ class Product extends Model
         $productDiscount = $productOffer ? $productOffer->discount : 0;
         return max($subCatDiscount, $productDiscount);
     }
+    public function getFinalPriceAttribute()
+    {
+        $discount = $this->discount ?? 0;
+        return $this->price_before_discount * (1 - $discount / 100);
+    }
     public function sub_category()
     {
         return $this->belongsTo(SubCategory::class, 'sub_category_id');

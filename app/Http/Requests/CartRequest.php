@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
-class ProductColorImageRequest extends FormRequest
+class CartRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -10,9 +10,7 @@ class ProductColorImageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'product_color_id' => 'required|uuid|exists:product_colors,id',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:4048',
+            'user_id' => 'required|uuid|exists:users,id'
         ];
     }
-
 }
