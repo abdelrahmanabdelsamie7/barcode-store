@@ -9,6 +9,10 @@ use App\Http\Requests\ProductColorImageRequest;
 class ProductColorImageController extends Controller
 {
     use ResponseJsonTrait;
+    public function __construct()
+    {
+        $this->middleware('auth:admins')->only(['store', 'destroy']);
+    }
     public function store(ProductColorImageRequest $request)
     {
         $data = $request->validated();

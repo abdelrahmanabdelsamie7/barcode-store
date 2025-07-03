@@ -9,8 +9,9 @@ class SizeRequest extends FormRequest
     }
     public function rules(): array
     {
+        $sizeId = $this->route('id') ?? $this->route('size');
         return [
-            'name' => 'required|string|in:S,M,L,XL,XXL,XXXL,4XL,5XL,6XL',
+            'name' => 'required|string|in:S,M,L,XL,2XL,3XL,4XL,5XL,6XL,7XL,8XL,9XL,10XL|unique:sizes,name,'.$sizeId,
         ];
     }
 }

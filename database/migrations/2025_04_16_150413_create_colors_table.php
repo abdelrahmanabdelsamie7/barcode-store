@@ -8,7 +8,7 @@ return new class extends Migration {
         Schema::create('colors', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name')->unique();
-            $table->string('color_code');
+            $table->string('hex_code');
             $table->timestamps();
         });
     }

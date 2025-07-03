@@ -1,86 +1,86 @@
 <?php
 namespace App\Http\Controllers\API;
-use App\Models\{Cart, CartItem, ProductVariant};
+use App\Models\{Cart, ProductVariant};
 use App\traits\ResponseJsonTrait;
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\CartItemRequest;
 
 class CartItemController extends Controller
 {
     use ResponseJsonTrait;
-    public function store(Request $request)
+    private function getCart(Request $request)
     {
-        $request->validate([
-            'product_variant_id' => 'required|exists:product_variants,id',
-            'quantity' => 'nullable|integer|min:1'
-        ]);
-
-        $user = auth('api')->user();
-        $cart = $user ? $user->cart : Cart::firstOrCreate(['user_id' => null]);
-        $productVariant = ProductVariant::with('product_color.product')->findOrFail($request->product_variant_id);
-        $price = $productVariant->product_color->product->final_price;
-        if ($price === null) {
-            return $this->sendError('Product price is not available', 400);
-        }
-        $quantity = $request->quantity ?? 1;
-
-        if ($quantity > $productVariant->quantity) {
-            return $this->sendError('Insufficient stock available', 400);
-        }
-
-        $cartItem = CartItem::where([
-            'cart_id' => $cart->id,
-            'product_variant_id' => $productVariant->id,
-        ])->first();
-
-        if ($cartItem) {
-            $newQuantity = $cartItem->quantity + $quantity;
-
-            if ($newQuantity > $productVariant->quantity) {
-                return $this->sendError('Insufficient stock available', 400);
-            }
-
-            $cartItem->update([
-                'quantity' => $newQuantity,
-                'price' => $price
-            ]);
+        if (auth('api')->check()) {
+            return Cart::firstOrCreate(['user_id' => auth('api')->id()]);
         } else {
-            $cartItem = CartItem::create([
-                'cart_id' => $cart->id,
-                'product_variant_id' => $productVariant->id,
-                'quantity' => $quantity,
-                'price' => $price
-            ]);
+            $visitorToken = $request->cookie('visitor_token');
+            if (!$visitorToken) {
+                return null;
+            }
+            return Cart::firstOrCreate(['visitor_token' => $visitorToken]);
         }
-
-        $cart->updateTotalPrice();
-
-        return $this->sendSuccess('Product added to cart successfully', $cartItem, 201);
     }
-    public function update(Request $request, CartItem $cartItem)
+    public function store(CartItemRequest $request)
+    {
+        $cart = $this->getCart($request);
+        if (!$cart) {
+            return $this->sendError('Visitor token is missing.', 401);
+        }
+        $productVariant = ProductVariant::findOrFail($request->product_variant_id);
+        $existing = $cart->items()->where('product_variant_id', $request->product_variant_id)->first();
+        $currentQuantity = $existing ? $existing->quantity : 0;
+        $newQuantity = $currentQuantity + $request->quantity;
+        if ($newQuantity > $productVariant->quantity) {
+            return $this->sendError("Quantity requested exceeds available stock.", 402);
+        }
+        if ($existing) {
+            $existing->update(['quantity' => $newQuantity]);
+        } else {
+            $cart->items()->create($request->validated());
+        }
+        return $this->sendSuccess("Item added to cart successfully.", [], 201);
+    }
+    public function update(Request $request, $cartItemId)
     {
         $request->validate([
-            'quantity' => 'required|integer|min:1',
+            'quantity' => 'required|integer|min:1'
         ]);
-        $user = auth('api')->user();
-        if ($user && $cartItem->cart->user_id !== $user->id) {
-            return $this->sendError('Unauthorized: You do not own this cart item', 403);
+        $cart = $this->getCart($request);
+        if (!$cart) {
+            return $this->sendError('Visitor token is missing.', 401);
         }
-        if ($request->quantity > $cartItem->productVariant->quantity) {
-            return $this->sendError('Insufficient stock available', 400);
+        $cartItem = $cart->items()->where('id', $cartItemId)->first();
+        if (!$cartItem) {
+            return $this->sendError('Cart item not found.', 404);
         }
-        $cartItem->updateQuantity($request->quantity);
-        return $this->sendSuccess('Cart item quantity updated successfully', $cartItem);
+        $productVariant = ProductVariant::findOrFail($cartItem->product_variant_id);
+        if ($request->quantity > $productVariant->quantity) {
+            return $this->sendError('Quantity requested exceeds available stock.', 400);
+        }
+        $cartItem->update(['quantity' => $request->quantity]);
+        return $this->sendSuccess('Cart item quantity updated successfully.', []);
     }
-    public function destroy(CartItem $cartItem)
+    public function destroy(Request $request, $cartItemId)
     {
-        $user = auth('api')->user();
-        if ($user && $cartItem->cart->user_id !== $user->id) {
-            return $this->sendError('Unauthorized: You do not own this cart item', 403);
+        $cart = $this->getCart($request);
+        if (!$cart) {
+            return $this->sendError('Visitor token is missing.', 401);
         }
-        $cart = $cartItem->cart;
+        $cartItem = $cart->items()->where('id', $cartItemId)->first();
+        if (!$cartItem) {
+            return $this->sendError('Cart item not found.', 404);
+        }
         $cartItem->delete();
-        $cart->updateTotalPrice();
-        return $this->sendSuccess('Cart item removed successfully');
+        return $this->sendSuccess('Item removed from cart successfully.');
+    }
+    public function destroyAll(Request $request)
+    {
+        $cart = $this->getCart($request);
+        if (!$cart) {
+            return $this->sendError('Visitor token is missing.', 401);
+        }
+        $cart->items()->delete();
+        return $this->sendSuccess('All items removed from cart successfully.');
     }
 }

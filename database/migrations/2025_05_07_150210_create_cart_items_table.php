@@ -10,7 +10,6 @@ return new class extends Migration {
             $table->foreignUuid('cart_id')->constrained('carts')->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignUuid('product_variant_id')->constrained('product_variants')->cascadeOnDelete()->cascadeOnUpdate();
             $table->integer('quantity')->default(1);
-            $table->decimal('price', 10, 2);
             $table->timestamps();
         });
     }

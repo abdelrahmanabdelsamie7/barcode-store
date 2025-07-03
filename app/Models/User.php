@@ -1,33 +1,31 @@
 <?php
 namespace App\Models;
-use App\Models\Cart;
+use App\Models\{Cart, Order,Wishlist};
 use App\traits\UsesUuid;
 use Laravel\Sanctum\HasApiTokens;
-use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable implements JWTSubject, MustVerifyEmail
+class User extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable, UsesUuid;
     protected $fillable = [
-        'name',
-        'email',
+        'first_name',
+        'last_name',
+        'whatsapp_phone',
         'password',
-        'phone',
-        'address' ,
-        'verification_token',
-        'verification_token_expires_at',
+        'phone_verification_code',
+        'phone_verified_at',
+    ];
+    protected $casts = [
+        'phone_verified_at' => 'datetime',
+        'is_active' => 'boolean',
     ];
     protected $hidden = [
         'password',
-        'remember_token',
-    ];
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
+        'phone_verification_code',
     ];
     protected static function boot()
     {
@@ -38,7 +36,19 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
     }
     public function cart()
     {
-        return $this->hasOne(Cart::class);
+        return $this->hasOne(Cart::class, 'user_id');
+    }
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'user_id');
+    }
+    public function wishlists()
+    {
+        return $this->hasMany(Wishlist::class, 'user_id');
+    }
+    public function discountCodes()
+    {
+        return $this->hasMany(UserDiscountCode::class);
     }
     public function getJWTIdentifier()
     {
@@ -47,5 +57,9 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
     public function getJWTCustomClaims()
     {
         return [];
+    }
+    public function isPhoneVerified()
+    {
+        return !is_null($this->phone_verified_at);
     }
 }

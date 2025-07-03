@@ -1,38 +1,57 @@
 <?php
 namespace App\Http\Controllers\API;
-use App\Models\Cart;
+use App\Models\{Cart};
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 use App\traits\ResponseJsonTrait;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CartItemResource;
 
 class CartController extends Controller
 {
     use ResponseJsonTrait;
-    protected $user;
-    public function __construct()
+    public function index(Request $request)
     {
-        $this->user = auth('api')->user();
-    }
-    public function index()
-    {
-        $cart = Cart::where('user_id', $this->user->id)
-            ->with('cartItems.productVariant.product_color.product')
-            ->first();
-        if (!$cart || optional($cart->cartItems)->isEmpty()) {
-            return $this->sendSuccess("Cart is empty!");
+        $isLight = $request->query('light') === 'true';
+
+        if (auth('api')->check()) {
+            $cart = Cart::with([
+                'items.productVariant' => function ($q) {
+                    $q->with(['product_color', 'size', 'product']);
+                }
+            ])->firstOrCreate(['user_id' => auth('api')->id()]);
+        } else {
+            $visitorToken = $request->cookie('visitor_token') ?? Str::uuid()->toString();
+
+            $cart = Cart::with(relations: [
+                'items.productVariant' => function ($q) {
+                    $q->with(['product_color', 'size', 'product']);
+                }
+            ])->firstOrCreate(['visitor_token' => $visitorToken]);
+
+            return $this->sendSuccess('Your Cart Retrieved Successfully', [
+                'cart' => [
+                    'id' => $cart->id,
+                    'user_id' => $cart->user_id,
+                    'visitor_token' => $cart->visitor_token,
+                    'total_quantity' => $cart->total_quantity,
+                    'total_price' => $cart->total_price,
+                    'items' => CartItemResource::collection($cart->items)->additional(['light' => $isLight]),
+                ],
+                'cart_id' => $cart->id
+            ])->cookie('visitor_token', $visitorToken, 60 * 24 * 30);
         }
-        return $this->sendSuccess('Cart Retrieved Successfully!', $cart);
-    }
-    public function store()
-    {
-        $cart = Cart::firstOrCreate(['user_id' => $this->user->id]);
-        $cart->updateTotalPrice();
-        return $this->sendSuccess('Cart Created Successfully!', $cart, 201);
-    }
-    public function deleteItems()
-    {
-        $cart = Cart::where('user_id', $this->user->id)->firstOrFail();
-        $cart->cartItems()->delete();
-        $cart->updateTotalPrice();
-        return $this->sendSuccess('Cart items deleted successfully!');
+
+        return $this->sendSuccess('Your Cart Retrieved Successfully', [
+            'cart' => [
+                'id' => $cart->id,
+                'user_id' => $cart->user_id,
+                'visitor_token' => $cart->visitor_token,
+                'total_quantity' => $cart->total_quantity,
+                'total_price' => $cart->total_price,
+                'items' => CartItemResource::collection($cart->items)->additional(['light' => $isLight]),
+            ],
+            'cart_id' => $cart->id
+        ]);
     }
 }

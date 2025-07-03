@@ -10,12 +10,17 @@ class SubCategoryRequest extends FormRequest
     public function rules(): array
     {
         $subCategoryId = $this->route('id') ?? $this->route('sub_category');
+        $isUpdate = in_array($this->method(), ['PUT', 'PATCH', 'POST']) && $subCategoryId;
         return [
-            'name' => 'required|string|max:255|unique:sub_categories,name,' . $subCategoryId,
-            'slug' => 'required|string|max:255|unique:sub_categories,slug,' . $subCategoryId,
+            'name' => [
+                $isUpdate ? 'required' : 'required',
+                'string',
+                'max:255',
+                'unique:sub_categories,name,' . $subCategoryId,
+            ],
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,avif|max:4048',
-            'category_id' => 'required|string|exists:categories,id',
-            'is_active' => 'required|boolean',
+            'category_id' => [$isUpdate ? 'sometimes' : 'required', 'string', 'exists:categories,id'],
+            'is_active' => 'nullable|boolean',
         ];
     }
 }

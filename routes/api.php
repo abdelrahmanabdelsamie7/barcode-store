@@ -1,9 +1,8 @@
 <?php
 use App\Http\Controllers\{AuthUserController,AuthAdminController};
-use App\Http\Controllers\API\{BrandController,CategoryController,SubCategoryController,ProductController,ColorController,SizeController,ProductColorController,ProductColorImageController,ProductVariantController,OfferController,CartController,CartItemController};
+use App\Http\Controllers\API\{CategoryController,SubCategoryController,ProductController,ColorController,SizeController,ProductColorController,ProductColorImageController,ProductVariantController,OfferController,CartController,CartItemController,DiscountCampaignController,UserDiscountCodesController,OrderController};
 
 Route::apiResources([
-    'brands' => BrandController::class,
     'categories' => CategoryController::class,
     'sub-categories' => SubCategoryController::class,
     'products' => ProductController::class,
@@ -15,6 +14,9 @@ Route::apiResources([
     'offers'=> OfferController::class,
     'cart'=> CartController::class,
     'cart-item'=> CartItemController::class,
+    'order'=> OrderController::class,
+    'discount-campaigns'=> DiscountCampaignController::class,
+    'user-discount-codes'=> UserDiscountCodesController::class,
 ]);
 
 Route::prefix('user')->group(function () {
@@ -22,22 +24,26 @@ Route::prefix('user')->group(function () {
     Route::post('/login', [AuthUserController::class, 'login']);
     Route::post('/logout', [AuthUserController::class, 'logout']);
     Route::get('/getaccount', [AuthUserController::class, 'getaccount']);
-    Route::post('/password/forgot', [AuthUserController::class, 'forgotPassword']);
-    Route::post('/password/reset', [AuthUserController::class, 'resetPassword']);
-    Route::delete('/account', [AuthUserController::class, 'deleteAccount']);
-    Route::get('/verify-email/{token}', [AuthUserController::class, 'verifyEmail']);
-    Route::post('/resend-verification', [AuthUserController::class, 'resendVerification']);
 });
-Route::prefix( 'admin')->group(function () {
-    Route::post('/register', [AuthAdminController::class, 'register']);
+Route::prefix('admin')->middleware('api')->group(function () {
     Route::post('/login', [AuthAdminController::class, 'login']);
-    Route::post('/logout', [AuthAdminController::class, 'logout']);
-    Route::get('/getaccount', [AuthAdminController::class, 'getaccount']);
+
+    Route::middleware('auth:admins')->group(function () {
+        Route::controller(AuthAdminController::class)->group(function () {
+            Route::post('/add-admin', 'addAdmin');
+            Route::get('/getaccount', 'getAccount');
+            Route::get('/all-admins', 'allAdmins');
+            Route::post('/logout', 'logout');
+            Route::post('/refresh', 'refresh');
+            Route::delete('/delete-admin/{id}', 'deleteAdmin');
+            Route::put('/update-password/{id?}', [AuthAdminController::class, 'updatePassword']);
+        });
+    });
 });
 
-Route::match(['post', 'put', 'patch'], 'brands/{id}', [BrandController::class, 'update']);
+Route::get('/home-products', [ProductController::class, 'homeProducts']);
 Route::match(['post', 'put', 'patch'], 'categories/{id}', [CategoryController::class, 'update']);
 Route::match(['post', 'put', 'patch'], 'sub-categories/{id}', [SubCategoryController::class, 'update']);
 Route::match(['post', 'put', 'patch'], 'products/{id}', [ProductController::class, 'update']);
 Route::match(['post', 'put', 'patch'], 'product-color-images/{id}', [ProductColorImageController::class, 'update']);
-Route::delete('cart', [CartController::class, 'deleteItems']);
+Route::delete('/delete-all', [CartItemController::class, 'destroyAll']);

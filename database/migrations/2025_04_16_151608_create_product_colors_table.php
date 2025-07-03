@@ -10,6 +10,7 @@ return new class extends Migration {
             $table->foreignUuid('product_id')->constrained('products')->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignUuid('color_id')->constrained('colors')->cascadeOnDelete()->cascadeOnUpdate();
             $table->boolean('is_main')->default(false);
+            $table->unique(['product_id', 'color_id'], 'product_color_unique');
             $table->timestamps();
         });
     }

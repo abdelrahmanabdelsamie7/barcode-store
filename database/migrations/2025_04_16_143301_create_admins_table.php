@@ -11,7 +11,7 @@ return new class extends Migration
             $table->string('name') ;
             $table->string('email')->unique();
             $table->string('password');
-             $table->string('role')->default('super-admin');
+            $table->boolean('is_super_admin')->default(false);
             $table->timestamps();
         });
     }

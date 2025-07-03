@@ -12,8 +12,7 @@ class CategoryRequest extends FormRequest
         $categoryId = $this->route('id') ?? $this->route('category');
         return [
             'name' => 'required|string|max:255|unique:categories,name,' . $categoryId,
-            'slug' => 'required|string|max:255|unique:categories,slug,' . $categoryId,
-            'is_active' => 'required|boolean',
+            'is_active' => 'nullable|boolean',
         ];
     }
 }

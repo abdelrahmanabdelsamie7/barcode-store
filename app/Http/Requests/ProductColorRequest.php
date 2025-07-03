@@ -11,8 +11,8 @@ class ProductColorRequest extends FormRequest
     {
         return [
             'product_id' => 'required|string|exists:products,id',
-            'color_id' => 'required|string|exists:colors,id',
-            'is_main' => 'required|boolean',
+            'color_id' => 'required|string|exists:colors,id|unique:product_colors,color_id,NULL,id,product_id,' . $this->product_id,
+            'is_main' => 'nullable|boolean',
         ];
     }
 }

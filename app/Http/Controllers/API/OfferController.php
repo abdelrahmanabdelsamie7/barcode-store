@@ -1,57 +1,43 @@
 <?php
 namespace App\Http\Controllers\API;
-use App\Models\{Offer, Product, SubCategory};
-use App\traits\ResponseJsonTrait;
+use App\Http\Resources\OfferResource;
+use App\Models\Offer;
 use App\Http\Requests\OfferRequest;
 use App\Http\Controllers\Controller;
+use App\traits\ResponseJsonTrait;
 
 class OfferController extends Controller
 {
     use ResponseJsonTrait;
+    public function __construct()
+    {
+        $this->middleware('auth:admins')->only(['store', 'update', 'destroy']);
+    }
     public function index()
     {
-        $offers = Offer::all();
-        return $this->sendSuccess('All Offers Retrieved Successfully!', $offers);
-    }
-    public function show(string $id)
-    {
-        $offer = Offer::with('offerable')->findOrFail($id);
-        return $this->sendSuccess('Specific Offer Retrieved Successfully!', $offer);
+        $offers = Offer::with('subCategory')->get();
+        return $this->sendSuccess('All Offers Retrieved Successfully !', OfferResource::collection($offers));
     }
     public function store(OfferRequest $request)
     {
-        $offerableType = $request->offerable_type;
-        $offerableId = $request->offerable_id;
-        if (!in_array($offerableType, ['product', 'sub_category'])) {
-            return response()->json(['message' => 'Invalid offerable type'], 422);
-        }
-        $offerableModel = $offerableType === 'product' ? Product::class : SubCategory::class;
-        $offerable = $offerableModel::find($offerableId);
-        if (!$offerable) {
-            return response()->json(['message' => 'Offerable not found'], 404);
-        }
-        $offer = Offer::create([
-            'discount' => $request->discount,
-            'start_at' => $request->start_at,
-            'end_at' => $request->end_at,
-            'offerable_type' => $offerableType,
-            'offerable_id' => $offerableId
-        ]);
-        return response()->json([
-            'message' => 'Offer created successfully!',
-            'offer' => $offer
-        ]);
+        $offer = Offer::create($request->validated());
+        return $this->sendSuccess('Offer Added Successfully', new OfferResource($offer));
+    }
+    public function show(string $id)
+    {
+        $offer = Offer::with('subCategory')->findOrFail($id);
+        return $this->sendSuccess('Specific Offer Retrieved Successfully !', new OfferResource($offer));
     }
     public function update(OfferRequest $request, string $id)
     {
         $offer = Offer::findOrFail($id);
         $offer->update($request->validated());
-        return $this->sendSuccess('Offer Updated Successfully', $offer, 200);
+        return $this->sendSuccess('Offer Updated Successfully !', new OfferResource($offer), 201);
     }
-    public function destroy($id)
+    public function destroy(string $id)
     {
         $offer = Offer::findOrFail($id);
         $offer->delete();
-        return $this->sendSuccess('Offer Deleted Successfully');
+        return $this->sendSuccess('Offer Deleted Successfully !', null, 204);
     }
 }

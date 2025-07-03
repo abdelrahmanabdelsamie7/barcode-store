@@ -9,24 +9,32 @@ class Cart extends Model
 {
     use HasFactory, UsesUuid;
     protected $table = 'carts';
-    protected $fillable = ['user_id', 'total_price', 'total_quantity'];
-    public function user()
+    protected $fillable = ['user_id', 'visitor_token'];
+    protected $appends = ['total_quantity', 'total_price'];
+    public function getVisitorTokenAttribute($value)
     {
-        return $this->belongsTo(User::class);
+        return $value ?? null;
     }
-    public function cartItems()
+    public function setVisitorTokenAttribute($value)
     {
-        return $this->hasMany(CartItem::class);
-    }
-    public function updateTotalPrice()
-    {
-        $this->total_price = $this->cartItems->sum(fn($item) => $item->price * $item->quantity);
-        $this->total_quantity = $this->cartItems->sum('quantity');
-        $this->save();
+        $this->attributes['visitor_token'] = $value ?? null;
     }
     public function getTotalQuantityAttribute()
     {
-        return $this->cartItems->sum('quantity');
+        return $this->items->sum('quantity');
     }
-
+    public function getTotalPriceAttribute()
+    {
+        return $this->items->collect()->sum(function ($item) {
+            return $item->quantity * optional($item->productVariant->product)->final_price;
+        });
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+    public function items()
+    {
+        return $this->hasMany(CartItem::class);
+    }
 }

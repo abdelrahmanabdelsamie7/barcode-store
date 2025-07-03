@@ -1,6 +1,5 @@
 <?php
 namespace App\Http\Controllers\API;
-
 use App\Http\Requests\ProductVariantRequest;
 use App\Models\ProductVariant;
 use App\traits\ResponseJsonTrait;
@@ -9,13 +8,15 @@ use Illuminate\Http\Request;
 class ProductVariantController extends Controller
 {
     use ResponseJsonTrait;
-
+    public function __construct()
+    {
+        $this->middleware('auth:admins')->only(['store', 'update']);
+    }
     public function store(ProductVariantRequest $request)
     {
         $product_variant = ProductVariant::create($request->validated());
         return $this->sendSuccess('Add Quantity To Product Size Successfully', $product_variant, 201);
     }
-
     public function update(Request $request, string $id)
     {
         $validated = $request->validate([

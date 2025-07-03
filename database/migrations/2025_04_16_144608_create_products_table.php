@@ -9,13 +9,12 @@ return new class extends Migration {
             $table->uuid('id')->primary();
             $table->string('title')->unique();
             $table->string('slug')->unique();
-            $table->text('description');
+            $table->text('short_description')->nullable();
+            $table->string('matrial');
             $table->string('image_cover');
-            $table->string('sku')->nullable()->unique();
-            $table->decimal('price_before_discount', 10, 2);
+            $table->decimal('price_before_discount', 10, 2)->index();
             $table->enum('status', ['active', 'inactive', 'pending'])->default('active');
             $table->foreignUuid('sub_category_id')->constrained('sub_categories')->cascadeOnDelete()->cascadeOnDelete();
-            $table->foreignUuid('brand_id')->constrained('brands')->cascadeOnDelete()->cascadeOnDelete();
             $table->timestamps();
         });
     }

@@ -9,7 +9,7 @@ class Size extends Model
 {
     use HasFactory, UsesUuid;
     protected $table = 'sizes';
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'order'];
     public function product_variants()
     {
         return $this->hasMany(ProductVariant::class, 'size_id');

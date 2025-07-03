@@ -1,29 +1,31 @@
 <?php
 namespace App\Models;
-use App\traits\UsesUuid;
+use App\traits\{UsesUuid, HasSlug};
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Models\{SubCategory, Brand, ProductColor, Color, ProductColorImage, ProductVariant, Size, Offer};
+use App\Models\{SubCategory, ProductColor, Color, ProductColorImage, ProductVariant, Size, HomeProduct};
 
 class Product extends Model
 {
-    use HasFactory, UsesUuid;
+    use HasFactory, UsesUuid, HasSlug;
     protected $table = 'products';
     protected $fillable = [
         'title',
         'slug',
-        'description',
+        'matrial',
         'image_cover',
-        'sku',
+        'short_description',
         'price_before_discount',
         'status',
         'sub_category_id',
-        'brand_id',
     ];
-    public function offers()
+    public function getSlugSource()
     {
-        return $this->morphMany(Offer::class, 'offerable');
+        return 'title';
     }
+    protected $casts = [
+        'price_before_discount' => 'float',
+    ];
     public function getDiscountAttribute()
     {
         $now = now();
@@ -34,26 +36,17 @@ class Product extends Model
         $subCatDiscount = $subCatOffers->isNotEmpty()
             ? $subCatOffers->max('discount')
             : 0;
-        $productOffer = $this->offers()
-            ->where('start_at', '<=', $now)
-            ->where('end_at', '>=', $now)
-            ->latest()
-            ->first();
-        $productDiscount = $productOffer ? $productOffer->discount : 0;
-        return max($subCatDiscount, $productDiscount);
+        return $subCatDiscount;
     }
     public function getFinalPriceAttribute()
     {
         $discount = $this->discount ?? 0;
-        return $this->price_before_discount * (1 - $discount / 100);
+        $price = (float) $this->price_before_discount;
+        return round($price * (1 - $discount / 100), 2);
     }
     public function sub_category()
     {
         return $this->belongsTo(SubCategory::class, 'sub_category_id');
-    }
-    public function brand()
-    {
-        return $this->belongsTo(Brand::class, 'brand_id');
     }
     public function product_colors()
     {
@@ -93,5 +86,9 @@ class Product extends Model
             ['product_id', 'product_color_id'],
             ['id', 'id']
         );
+    }
+    public function homeProduct()
+    {
+        return $this->hasOne(HomeProduct::class);
     }
 }

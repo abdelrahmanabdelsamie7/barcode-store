@@ -11,7 +11,7 @@ class ProductColorImageRequest extends FormRequest
     {
         return [
             'product_color_id' => 'required|uuid|exists:product_colors,id',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:4048',
+            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif,webp,HEIC|max:5120',
         ];
     }
 

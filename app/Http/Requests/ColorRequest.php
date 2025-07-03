@@ -12,7 +12,7 @@ class ColorRequest extends FormRequest
         $colorId = $this->route('id') ?? $this->route('color');
         return [
             'name' => 'required|string|max:255|unique:colors,name,' . $colorId,
-            'color_code' => 'required|string|max:255'
+            'hex_code' => 'required|string|max:255'
         ];
     }
 }

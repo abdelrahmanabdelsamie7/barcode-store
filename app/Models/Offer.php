@@ -1,19 +1,22 @@
 <?php
 namespace App\Models;
 use App\traits\UsesUuid;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\SubCategory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 class Offer extends Model
 {
-    use HasFactory,UsesUuid;
+    use HasFactory, UsesUuid;
     protected $table = 'offers';
-    protected $fillable = ['discount', 'offerable_type', 'offerable_id', 'start_at', 'end_at'];
-    public function offerable()
+    protected $fillable = ['discount', 'sub_category_id', 'start_at', 'end_at'];
+    protected $casts = [
+        'start_at' => 'datetime',
+        'end_at' => 'datetime',
+    ];
+
+    public function SubCategory()
     {
-        return $this->morphTo()
-            ->where(function ($query) {
-                $query->where('offerable_type', 'product')
-                    ->orWhere('offerable_type', 'subcategory');
-            });
+        return $this->belongsTo(SubCategory::class, 'sub_category_id');
     }
 }
