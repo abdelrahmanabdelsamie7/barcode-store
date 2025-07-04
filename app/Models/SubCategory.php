@@ -9,7 +9,7 @@ class SubCategory extends Model
 {
     use HasFactory, UsesUuid, HasSlug;
     protected $table = 'sub_categories';
-    protected $fillable = ['name', 'slug', 'image', 'category_id', 'is_active'];
+    protected $fillable = ['name', 'slug', 'image', 'size_type','category_id', 'is_active'];
     public function category()
     {
         return $this->belongsTo(Category::class, 'category_id');

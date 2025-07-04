@@ -21,6 +21,7 @@ class SubCategoryRequest extends FormRequest
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,avif|max:4048',
             'category_id' => [$isUpdate ? 'sometimes' : 'required', 'string', 'exists:categories,id'],
             'is_active' => 'nullable|boolean',
+            'size_type' => 'required|in:clothes,pants,shoes'
         ];
     }
 }

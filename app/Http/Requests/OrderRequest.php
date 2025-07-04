@@ -14,37 +14,24 @@ class OrderRequest extends FormRequest
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
-            'postal_code' => 'nullable|string|max:10',
             'address' => 'required|string',
             'city' => [
                 'required',
                 Rule::in([
-                    'Cairo',
-                    'Alexandria',
-                    'Giza',
-                    'Sohag',
-                    'Asyut',
-                    'Mansoura',
-                    'Zagazig',
-                    'Tanta',
-                    'Banha',
-                    'Minya',
-                    'Qena',
-                    'Other',
+                    'Cairo', 'Alexandria', 'Giza', 'Sohag', 'Asyut', 'Mansoura',
+                    'Zagazig', 'Tanta', 'Banha', 'Minya', 'Qena', 'Other',
                 ]),
             ],
             'payment_method' => [
                 'required',
                 Rule::in([
-                    'Cash on Delivery',
-                    'Vodfone Cach',
-                    'Insta Pay',
-                    'mylo'
+                    'Cash on Delivery', 'Vodfone Cach', 'Insta Pay', 'mylo'
                 ]),
             ],
-            'user_discount_code' => 'nullable|string|exists:user_discount_codes,code',
+            'code' => 'nullable|string|exists:user_discount_codes,code',
             'shipping_cost' => 'nullable|numeric|min:0',
         ];
+
         if (in_array($this->payment_method, ['Vodfone Cach', 'Insta Pay'])) {
             $rules['payment_phone'] = ['required', 'string', 'max:20'];
             $rules['payment_proof'] = ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'];
@@ -66,7 +53,7 @@ class OrderRequest extends FormRequest
             'payment_method.required' => 'طريقة الدفع مطلوبة',
             'payment_phone.required' => 'رقم الهاتف مطلوب لطريقة الدفع المختارة',
             'payment_proof.required' => 'إثبات الدفع مطلوب لطريقة الدفع المختارة',
-
+            'code.exists' => 'كود الخصم غير صالح أو غير موجود',
         ];
     }
 }

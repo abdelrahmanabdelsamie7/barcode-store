@@ -10,9 +10,10 @@ class WishlistController extends Controller
     use ResponseJsonTrait;
     public function index(Request $request)
     {
+        $user = auth('api')->user();
         $query = Wishlist::with('product');
-        if ($request->user()) {
-            $query->where('user_id', $request->user()->id);
+        if ($user) {
+            $query->where('user_id', $user->id);
         } elseif ($request->visitor_token) {
             $query->where('visitor_token', $request->visitor_token);
         } else {
@@ -26,7 +27,8 @@ class WishlistController extends Controller
             'product_id' => 'required|exists:products,id',
             'visitor_token' => 'nullable|string',
         ]);
-        $userId = $request->user()?->id;
+        $user = auth('api')->user();
+        $userId = $user?->id;
         $visitorToken = $request->visitor_token;
         $alreadyExists = Wishlist::where('product_id', $request->product_id)
             ->when($userId, fn($q) => $q->where('user_id', $userId))
@@ -42,11 +44,12 @@ class WishlistController extends Controller
             'product_id' => $request->product_id,
         ]);
         return $this->sendSuccess('Product added to wishlist', $wishlist, 201);
-    }
+    } 
     public function destroy(Request $request, $id)
     {
         $wishlist = Wishlist::findOrFail($id);
-        if ($request->user()?->id === $wishlist->user_id || $request->visitor_token === $wishlist->visitor_token) {
+        $user = auth('api')->user();
+        if ($user?->id === $wishlist->user_id || $request->visitor_token === $wishlist->visitor_token) {
             $wishlist->delete();
             return $this->sendSuccess('Item removed from wishlist');
         }

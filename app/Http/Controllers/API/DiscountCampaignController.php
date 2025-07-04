@@ -1,10 +1,11 @@
 <?php
 namespace App\Http\Controllers\API;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use App\Models\DiscountCampaign;
 use App\traits\ResponseJsonTrait;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DiscountCampaignRequest;
+use App\Models\{DiscountCampaign, UserDiscountCode};
 
 class DiscountCampaignController extends Controller
 {
@@ -17,8 +18,6 @@ class DiscountCampaignController extends Controller
     {
         $discountCampaigns = DiscountCampaign::query()
             ->when($request->has('search'), fn($q) => $q->where('name', 'like', '%' . $request->search . '%'))
-            ->when($request->has('type'), fn($q) => $q->where('discount_type', $request->type))
-            ->with('subCategory')
             ->latest()
             ->get();
         return $this->sendSuccess('Discount campaigns retrieved successfully.', $discountCampaigns);
@@ -26,15 +25,20 @@ class DiscountCampaignController extends Controller
     public function store(DiscountCampaignRequest $request)
     {
         $validated = $request->validated();
-        if (!$validated || !is_array($validated)) {
-            return $this->sendError('Invalid data provided.', 422);
-        }
         $campaign = DiscountCampaign::create($validated);
+        if ($campaign->type === 'public') {
+            for ($i = 0; $i < 10; $i++) {
+                UserDiscountCode::create([
+                    'campaign_id' => $campaign->id,
+                    'code' => strtoupper(Str::random(10)),
+                ]);
+            }
+        }
         return $this->sendSuccess('Discount campaign created successfully.', $campaign);
     }
     public function show($id)
     {
-        $discountCampaign = DiscountCampaign::with('subCategory')->findOrFail($id);
+        $discountCampaign = DiscountCampaign::findOrFail($id);
         return $this->sendSuccess('Discount campaign retrieved successfully.', $discountCampaign);
     }
     public function update(DiscountCampaignRequest $request, $id)

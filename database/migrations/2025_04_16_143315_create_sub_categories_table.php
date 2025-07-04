@@ -12,6 +12,7 @@ return new class extends Migration {
             $table->string('slug')->unique();
             $table->string('image');
             $table->boolean('is_active')->default(true);
+            $table->string('size_type')->default('clothes');
             $table->timestamps();
         });
     }

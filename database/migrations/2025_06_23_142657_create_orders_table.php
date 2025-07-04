@@ -9,10 +9,10 @@ return new class extends Migration {
             $table->uuid('id')->primary();
             $table->foreignUuid('user_id')->nullable()->constrained('users')->cascadeOnDelete()->cascadeOnUpdate();
             $table->uuid('visitor_token')->nullable()->index();
+            $table->uuid('cart_id')->nullable();
             $table->string('first_name');
             $table->string('last_name');
             $table->string('phone');
-            $table->string('postal_code')->nullable();
             $table->text('address');
             $table->enum('city', [
                 'Cairo',
@@ -39,6 +39,7 @@ return new class extends Migration {
             $table->foreignUuid('user_discount_code_id')->nullable()->constrained('user_discount_codes')->nullOnDelete();
             $table->decimal('discount_amount', 10, 2)->default(0);
             $table->timestamp('delivered_at')->nullable();
+            $table->timestamp('shipped_at')->nullable();
             $table->timestamps();
         });
     }

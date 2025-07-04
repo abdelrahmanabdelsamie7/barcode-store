@@ -1,10 +1,13 @@
 <?php
 namespace App\Http\Controllers\API;
-use App\Models\SubCategory;
+use Illuminate\Http\Request;
 use App\traits\ResponseJsonTrait;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\File;
+use App\Models\{SubCategory, Product};
+use App\Http\Resources\ProductResource;
 use App\Http\Requests\SubCategoryRequest;
+
 class SubCategoryController extends Controller
 {
     use ResponseJsonTrait;
@@ -17,10 +20,50 @@ class SubCategoryController extends Controller
         $subCategories = SubCategory::all();
         return $this->sendSuccess('Sub Categories Retrieved Successfully!', $subCategories);
     }
-    public function show(string $id)
+    public function show(Request $request, string $id)
     {
-        $subCategory = SubCategory::with(['products', 'offers'])->findOrFail($id);
-        return $this->sendSuccess('Specific Sub Category Retrieved Successfully!', $subCategory);
+        $subCategory = SubCategory::with(['offers'])->findOrFail($id);
+        $query = Product::where('sub_category_id', $id);
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('title', 'like', "%{$searchTerm}%")
+                    ->orWhere('matrial', 'like', "%{$searchTerm}%");
+
+                if (is_numeric($searchTerm)) {
+                    $q->orWhere('price_before_discount', '<=', $searchTerm);
+                }
+            });
+        }
+        if ($request->has('sort_by')) {
+            $sortField = $request->get('sort_by');
+            $sortOrder = $request->get('sort_order', 'asc');
+            if (in_array($sortField, ['price_before_discount', 'created_at'])) {
+                $query->orderBy($sortField, $sortOrder);
+            }
+        }
+        $products = $query->paginate(10);
+        $nextPage = $products->currentPage() < $products->lastPage()
+            ? $products->currentPage() + 1
+            : null;
+        $prevPage = $products->currentPage() > 1
+            ? $products->currentPage() - 1
+            : null;
+        return $this->sendSuccess(
+            'Specific Sub Category Retrieved Successfully!',
+            [
+                'sub_category' => $subCategory,
+                'pagination' => [
+                    'current_page' => $products->currentPage(),
+                    'next_page' => $nextPage,
+                    'prev_page' => $prevPage,
+                    'last_page' => $products->lastPage(),
+                    'per_page' => $products->perPage(),
+                    'total' => $products->total(),
+                ],
+                'products' => ProductResource::collection($products)
+            ]
+        );
     }
     public function store(SubCategoryRequest $request)
     {

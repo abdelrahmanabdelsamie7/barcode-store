@@ -25,7 +25,7 @@ class Cart extends Model
     }
     public function getTotalPriceAttribute()
     {
-        return $this->items->collect()->sum(function ($item) {
+        return $this->items->sum(function ($item) {
             return $item->quantity * optional($item->productVariant->product)->final_price;
         });
     }

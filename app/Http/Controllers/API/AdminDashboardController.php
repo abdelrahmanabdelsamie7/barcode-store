@@ -9,7 +9,7 @@ class AdminDashboardController extends Controller
     public function overview()
     {
         $totalOrders = Order::count();
-        $totalRevenue = Order::where('status', 'Delivered')->sum('total_price');  // عدد الطلبات اليوم
+        $totalRevenue = Order::where('status', 'Confirmed')->sum('total_price');  
         $todayOrders = Order::whereDate('created_at', Carbon::today())->count();
         $totalProducts = Product::count();
         $lowStockVariants = ProductVariant::with('product')
@@ -30,7 +30,6 @@ class AdminDashboardController extends Controller
                     'total_sold' => $item->total_sold,
                 ];
             });
-
         return response()->json([
             'total_orders' => $totalOrders,
             'total_revenue' => $totalRevenue,

@@ -36,7 +36,7 @@ class ProductController extends Controller
         if ($request->has('sort_by')) {
             $sortField = $request->get('sort_by');
             $sortOrder = $request->get('sort_order', 'asc');
-            if (in_array($sortField, ['price_before_discount', 'title', 'created_at'])) {
+            if (in_array($sortField, ['price_before_discount', 'created_at'])) {
                 $query->orderBy($sortField, $sortOrder);
             }
         }

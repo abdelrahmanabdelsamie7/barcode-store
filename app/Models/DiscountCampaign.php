@@ -11,10 +11,10 @@ class DiscountCampaign extends Model
     protected $fillable = [
         'id',
         'name',
+        'type',
         'discount_type',
         'discount_value',
         'min_order_value',
-        'sub_category_id',
         'start_at',
         'end_at',
     ];
@@ -25,9 +25,5 @@ class DiscountCampaign extends Model
     public function userDiscountCodes()
     {
         return $this->hasMany(UserDiscountCode::class, 'campaign_id');
-    }
-    public function subCategory()
-    {
-        return $this->belongsTo(SubCategory::class,'sub_category_id');
     }
 }

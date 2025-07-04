@@ -7,10 +7,10 @@ use App\traits\ResponseJsonTrait;
 class ColorController extends Controller
 {
     use ResponseJsonTrait;
-    // public function __construct()
-    // {
-    //     $this->middleware('auth:admins')->only(['store', 'update', 'destroy']);
-    // }
+    public function __construct()
+    {
+        $this->middleware('auth:admins')->only(['store', 'update', 'destroy']);
+    }
     public function index()
     {
         $colors = Color::all();

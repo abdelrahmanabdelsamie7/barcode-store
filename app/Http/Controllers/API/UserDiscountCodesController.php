@@ -17,15 +17,15 @@ class UserDiscountCodesController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'campaign_id' => 'required|exists:discount_campaigns,id',
+            'user_id' => 'nullable|exists:users,id',
+            'campaign_id' => 'required|exists:discount_campaigns,id'
         ]);
         $code = UserDiscountCode::create([
-            'user_id' => $data['user_id'],
+            'user_id' => $data['user_id'] ?? null,
             'campaign_id' => $data['campaign_id'],
             'code' => strtoupper(Str::random(10)),
         ]);
-        return $this->sendSuccess('Discount code created for user.', $code);
+        return $this->sendSuccess('Discount code created.', $code);
     }
     public function bulkGenerate(Request $request)
     {

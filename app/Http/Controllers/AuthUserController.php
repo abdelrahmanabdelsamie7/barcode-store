@@ -21,7 +21,7 @@ class AuthUserController extends Controller
                 'max:15',
                 'unique:users,whatsapp_phone',
                 'regex:/^01[0125][0-9]{8}$/',
-            ],
+            ], // otp 
             'password' => 'required|string|min:8|confirmed',
         ]);
 

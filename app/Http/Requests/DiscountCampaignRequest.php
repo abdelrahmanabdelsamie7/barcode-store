@@ -12,6 +12,7 @@ class DiscountCampaignRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'discount_type' => 'required|in:percent,amount',
+            'type' => 'required|in:user_only,public',
             'discount_value' => 'required|numeric|min:0',
             'min_order_value' => 'nullable|numeric|min:0',
             'sub_category_id' => 'nullable|exists:sub_categories,id',
